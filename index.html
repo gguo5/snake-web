@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 1px solid white;
+        }
+        .panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .button {
+            background-color: yellow;
+            color: black;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .start-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .start-panel h1 {
+            margin: 0 0 10px;
+        }
+        .start-panel p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="680" height="400"></canvas>
+    <div class="panel">
+        <button id="pauseButton" class="button">Pause</button>
+        <div id="stats">0/17</div>
+        <button id="playAgainButton" class="button" style="display: none;">Play Again</button>
+    </div>
+    <div id="startPanel" class="start-panel">
+        <h1>Snake Game</h1>
+        <p>Hi babe!</p>
+        <p>L/R Arrows: Adjust Speed</p>
+        <p>Enter: Start</p>
+        <p>Space: Pause</p>
+        <p>Enjoy :)</p>
+        <p>Speed: <span id="speedDisplay">3</span></p>
+        <button id="startButton" class="button">Start</button>
+    </div>
+    <script src="snake.js"></script>
+</body>
+</html>

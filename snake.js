@@ -73,11 +73,34 @@ startButton.addEventListener('click', () => {
     gameState = STATES.PLAYING;
     startPanel.style.display = 'none';
 });
-// Add click event listener to the canvas
+
+// Add click event listener to the canvas for the pause button
 canvas.addEventListener('click', (event) => {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
+
+    // Check if the click is on the Pause/Resume button
+    if (gameState === STATES.PLAYING || gameState === STATES.PAUSED) {
+        const pauseButtonX = PAUSE_BUTTON_X;
+        const pauseButtonY = PAUSE_BUTTON_Y;
+        const pauseButtonWidth = PAUSE_BUTTON_WIDTH * GRID_SIZE;
+        const pauseButtonHeight = PAUSE_BUTTON_HEIGHT * GRID_SIZE;
+
+        if (
+            mouseX >= pauseButtonX &&
+            mouseX <= pauseButtonX + pauseButtonWidth &&
+            mouseY >= pauseButtonY &&
+            mouseY <= pauseButtonY + pauseButtonHeight
+        ) {
+            // Toggle between pause and resume
+            if (gameState === STATES.PLAYING) {
+                gameState = STATES.PAUSED;
+            } else if (gameState === STATES.PAUSED) {
+                gameState = STATES.PLAYING;
+            }
+        }
+    }
 
     // Check if the click is on the Replay button
     if (
@@ -240,8 +263,8 @@ function draw() {
 	  // Draw replay button after game ends
     if (gameState === STATES.GAME_OVER || gameState === STATES.WIN) {
         ctx.fillStyle = YELLOW;
-        ctx.fillRect(REPLAY_BUTTON_X, REPLAY_BUTTON_Y, REPLAY_BUTTON_WIDTH * GRID_SIZE -5, REPLAY_BUTTON_HEIGHT * GRID_SIZE +5);
-        drawText("Replay", REPLAY_BUTTON_X + 10, REPLAY_BUTTON_Y + 20, BLACK, '16px');
+        ctx.fillRect(REPLAY_BUTTON_X, REPLAY_BUTTON_Y, REPLAY_BUTTON_WIDTH * GRID_SIZE+5, REPLAY_BUTTON_HEIGHT * GRID_SIZE +5);
+        drawText("Try Again", REPLAY_BUTTON_X + 10, REPLAY_BUTTON_Y + 20, BLACK, '16px');
     }																 
     // Draw "You Lose" or "You Win" messages
     if (gameState === STATES.GAME_OVER) {

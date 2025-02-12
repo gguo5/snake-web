@@ -47,27 +47,28 @@ let flashTimer = 0;
 const flashInterval = 500; // Flash every 500ms
 let frameCounter = 0;
 
-const pauseButton = document.getElementById('pauseButton');
-const playAgainButton = document.getElementById('playAgainButton');
-const stats = document.getElementById('stats');
 const startPanel = document.getElementById('startPanel');
 const startButton = document.getElementById('startButton');
 const speedDisplay = document.getElementById('speedDisplay');
 
-pauseButton.addEventListener('click', () => {
-    if (gameState === STATES.PLAYING) {
-        gameState = STATES.PAUSED;
-        pauseButton.textContent = 'Resume';
-    } else if (gameState === STATES.PAUSED) {
-        gameState = STATES.PLAYING;
-        pauseButton.textContent = 'Pause';
-    }
-});
+// Panel dimensions and position
+const PANEL_WIDTH = 5; // Width in grid cells
+const PANEL_HEIGHT = 3; // Height in grid cells
+const PANEL_X = GRID_WIDTH - PANEL_WIDTH; // Top-right corner
+const PANEL_Y = 0;
 
-playAgainButton.addEventListener('click', () => {
-    resetGame();
-});
+// Pause button dimensions and position
+const PAUSE_BUTTON_WIDTH = 4; // Width in grid cells
+const PAUSE_BUTTON_HEIGHT = 1; // Height in grid cells
+const PAUSE_BUTTON_X = PANEL_X * GRID_SIZE + 10; // Position within the panel
+const PAUSE_BUTTON_Y = PANEL_Y * GRID_SIZE + 10;
 
+// Replay button dimensions and position
+const REPLAY_BUTTON_WIDTH = 4; // Width in grid cells
+const REPLAY_BUTTON_HEIGHT = 1; // Height in grid cells
+const REPLAY_BUTTON_X = PANEL_X * GRID_SIZE + 10; // Position within the panel
+//const REPLAY_BUTTON_Y = (PANEL_Y + 2) * GRID_SIZE + 10; // Below the stats
+const REPLAY_BUTTON_Y = PANEL_Y * GRID_SIZE + 10; // Below the stats
 startButton.addEventListener('click', () => {
     gameState = STATES.PLAYING;
     startPanel.style.display = 'none';
@@ -94,7 +95,6 @@ document.addEventListener('keydown', (event) => {
     } else if (gameState === STATES.PLAYING) {
         if (event.key === ' ') {
             gameState = STATES.PAUSED;
-            pauseButton.textContent = 'Resume';
         } else if (event.key === 'ArrowUp' && direction[1] !== 1) {
             direction = [0, -1];
         } else if (event.key === 'ArrowDown' && direction[1] !== -1) {
@@ -106,7 +106,6 @@ document.addEventListener('keydown', (event) => {
         }
     } else if (gameState === STATES.PAUSED && event.key === ' ') {
         gameState = STATES.PLAYING;
-        pauseButton.textContent = 'Pause';
     }
 });
 
@@ -118,14 +117,13 @@ function resetGame() {
     speed = 3;
     collisionAllowance = 1;
     currentPixel = HEART_PIXELS_CENTERED[Math.floor(Math.random() * HEART_PIXELS_CENTERED.length)];
-    playAgainButton.style.display = 'none';
-    pauseButton.style.display = 'block';
-    stats.textContent = '0/17';
     startPanel.style.display = 'block';
 }
 
 function checkCollision() {
     const head = snake[0];
+    
+    // Check wall collision
     if (head[0] < 0 || head[0] >= GRID_WIDTH || head[1] < 0 || head[1] >= GRID_HEIGHT) {
         if (collisionAllowance > 0) {
             collisionAllowance -= 1;
@@ -133,6 +131,8 @@ function checkCollision() {
         }
         return true;
     }
+
+    // Check self-collision
     for (let i = 1; i < snake.length; i++) {
         if (snake[i][0] === head[0] && snake[i][1] === head[1]) {
             if (collisionAllowance > 0) {
@@ -142,11 +142,20 @@ function checkCollision() {
             return true;
         }
     }
+
+    // Check top-right panel collision
+    if (
+        head[0] >= PANEL_X && head[0] < GRID_WIDTH && // X within panel bounds
+        head[1] >= PANEL_Y && head[1] < PANEL_HEIGHT // Y within panel bounds
+    ) {
+        return true; // Collision with panel
+    }
+
     return false;
 }
 
 function drawText(text, x, y, color, fontSize = '24px') {
-    ctx.font = `${fontSize} Arial`;
+    ctx.font = `${fontSize} 'Noto Sans SC', sans-serif`; // Use Noto Sans SC for Chinese support
     ctx.fillStyle = color;
     ctx.fillText(text, x, y);
 }
@@ -187,23 +196,32 @@ function draw() {
         }
     }
 
-    // Draw panel
+    // Draw top-right panel
     ctx.fillStyle = PANEL_COLOR;
-    ctx.fillRect((GRID_WIDTH - 5) * GRID_SIZE, 0, 5 * GRID_SIZE, 3 * GRID_SIZE);
+    ctx.fillRect(PANEL_X * GRID_SIZE, PANEL_Y * GRID_SIZE, PANEL_WIDTH * GRID_SIZE, PANEL_HEIGHT * GRID_SIZE);
 
+    // Draw pause button
     if (gameState === STATES.PLAYING || gameState === STATES.PAUSED) {
-        pauseButton.style.display = 'block';
-        stats.textContent = `${collectedPixels.size}/${HEART_PIXELS_CENTERED.length}`;
-    } else if (gameState === STATES.GAME_OVER || gameState === STATES.WIN) {
-        playAgainButton.style.display = 'block';
-        pauseButton.style.display = 'none';
+        ctx.fillStyle = YELLOW;
+        ctx.fillRect(PAUSE_BUTTON_X, PAUSE_BUTTON_Y, PAUSE_BUTTON_WIDTH * GRID_SIZE -5, PAUSE_BUTTON_HEIGHT * GRID_SIZE+5);
+        drawText(gameState === STATES.PLAYING ? "Pause" : "Resume", PAUSE_BUTTON_X + 10, PAUSE_BUTTON_Y + 20, BLACK, '16px');
     }
 
+    // Draw stats
+    if (gameState === STATES.PLAYING || gameState === STATES.PAUSED) {
+        drawText(`${collectedPixels.size}/${HEART_PIXELS_CENTERED.length}`, PANEL_X * GRID_SIZE + 20, (PANEL_Y + 2) * GRID_SIZE +15, WHITE, '16px');
+    }
+
+	  // Draw replay button after game ends
+    if (gameState === STATES.GAME_OVER || gameState === STATES.WIN) {
+        ctx.fillStyle = YELLOW;
+        ctx.fillRect(REPLAY_BUTTON_X, REPLAY_BUTTON_Y, REPLAY_BUTTON_WIDTH * GRID_SIZE -5, REPLAY_BUTTON_HEIGHT * GRID_SIZE +5);
+        drawText("Replay", REPLAY_BUTTON_X + 10, REPLAY_BUTTON_Y + 20, BLACK, '16px');
+    }																 
+    // Draw "You Lose" or "You Win" messages
     if (gameState === STATES.GAME_OVER) {
         drawText('You Lose', canvas.width / 2 - 50, canvas.height / 2 - 50, RED);
-    }
-
-    if (gameState === STATES.WIN || gameState === STATES.DEBUG) {
+    } else if (gameState === STATES.WIN || gameState === STATES.DEBUG) {
         // Draw "CC I ❤️ YOU" pixel art
         const winMessage = [
             // C (first)

@@ -73,6 +73,31 @@ startButton.addEventListener('click', () => {
     gameState = STATES.PLAYING;
     startPanel.style.display = 'none';
 });
+// Add click event listener to the canvas
+canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    // Check if the click is on the Replay button
+    if (
+        gameState === STATES.GAME_OVER || gameState === STATES.WIN
+    ) {
+        const replayButtonX = REPLAY_BUTTON_X;
+        const replayButtonY = REPLAY_BUTTON_Y;
+        const replayButtonWidth = REPLAY_BUTTON_WIDTH * GRID_SIZE;
+        const replayButtonHeight = REPLAY_BUTTON_HEIGHT * GRID_SIZE;
+
+        if (
+            mouseX >= replayButtonX &&
+            mouseX <= replayButtonX + replayButtonWidth &&
+            mouseY >= replayButtonY &&
+            mouseY <= replayButtonY + replayButtonHeight
+        ) {
+            resetGame();
+        }
+    }
+});
 
 document.addEventListener('keydown', (event) => {
     if (gameState === STATES.START) {
